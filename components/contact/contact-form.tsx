@@ -2,10 +2,9 @@
 
 import { useState, FormEvent } from "react";
 import { CheckCircle } from "lucide-react";
-import { ContactFormData } from "@/types";
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState<ContactFormData>({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
@@ -17,8 +16,8 @@ export default function ContactForm() {
     if (!formData.name || !formData.email || !formData.message) return;
 
     setFormSubmitted(true);
-    // In a real app, POST to backend here
 
+    // Simulate success feedback
     setTimeout(() => {
       setFormSubmitted(false);
       setFormData({ name: "", email: "", message: "" });
@@ -28,52 +27,59 @@ export default function ContactForm() {
   const isFormValid = formData.name && formData.email && formData.message;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Nom</label>
         <input
           type="text"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          placeholder="Votre nom"
         />
       </div>
 
+      {/* Email */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Email</label>
         <input
           type="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          placeholder="votre@email.com"
         />
       </div>
 
+      {/* Message */}
       <div>
         <label className="block text-sm font-medium text-gray-700">
           Message
         </label>
         <textarea
+          rows={5}
           value={formData.message}
           onChange={(e) =>
             setFormData({ ...formData, message: e.target.value })
           }
-          rows={5}
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          className="mt-2 w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          placeholder="Votre message..."
         />
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Submit Section */}
+      <div className="flex items-center gap-4 ">
         <button
           type="submit"
           disabled={!isFormValid}
-          className={`px-6 py-3 rounded-lg font-semibold transition ${
+          className={`px-6 py-3 rounded-lg font-semibold transition cursor-pointer  ${
             isFormValid
               ? "bg-purple-600 text-white hover:bg-purple-700"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
         >
-          Envoyer le Message
+          Envoyer le message
         </button>
 
         {formSubmitted && (
@@ -84,11 +90,12 @@ export default function ContactForm() {
         )}
       </div>
 
+      {/* Direct Email */}
       <div className="pt-4 text-sm text-gray-500">
-        Ou écrivez directement :{" "}
+        Ou écrivez directement à :{" "}
         <a
           href="mailto:contact@leopoldine-almeida.com"
-          className="text-purple-600 hover:text-purple-700"
+          className="text-purple-600 font-medium hover:text-purple-700"
         >
           contact@leopoldine-almeida.com
         </a>
