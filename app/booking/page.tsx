@@ -35,7 +35,6 @@ export default function BookingPage() {
         <div className="md:col-span-2">
           <div className="bg-white rounded-lg shadow p-6">
             <Calendar
-              calendarData={calendarData}
               selectedDate={selectedDate}
               onSelectDate={(date) => {
                 setSelectedDate(date);

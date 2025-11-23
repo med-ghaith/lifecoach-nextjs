@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
+import { sendEmail } from "@/lib/email";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -11,13 +12,37 @@ export default function ContactForm() {
     phone: "",
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (!formData.name || !formData.email || !formData.message) return;
+    const html = `
+    <h2>New Contact Message</h2>
+    <p><strong>Name:</strong> ${formData.name}</p>
+    <p><strong>Email:</strong> ${formData.email}</p>
+    <p><strong>Phone:</strong> ${formData.phone || "N/A"}</p>
+    <p><strong>Message:</strong></p>
+    <p>${formData.message}</p>
+  `;
 
-    setFormSubmitted(true);
+    const result = await sendEmail({
+      to: formData.email, // or your admin email
+      subject: "New Contact Message",
+      html,
+    });
 
+    if (result?.success) {
+      setFormSubmitted(true);
+      setTimeout(() => {
+        setFormSubmitted(false);
+        setFormData({ name: "", email: "", message: "", phone: "" });
+      }, 2000);
+    } else {
+      setError("Une erreur s'est produite. Veuillez réessayer.");
+    }
     await fetch("/api/send-whatsapp", {
       method: "POST",
       headers: {
@@ -25,12 +50,6 @@ export default function ContactForm() {
       },
       body: JSON.stringify(formData),
     });
-
-    // Simulate success feedback
-    setTimeout(() => {
-      setFormSubmitted(false);
-      setFormData({ name: "", email: "", message: "", phone: "" });
-    }, 2000);
   };
 
   const isFormValid = formData.name && formData.email && formData.message;
@@ -66,7 +85,11 @@ export default function ContactForm() {
         <input
           type="text"
           value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          onChange={(e) => {
+            // Allow only digits and plus sign
+            const sanitized = e.target.value.replace(/[^0-9+]/g, "");
+            setFormData({ ...formData, phone: sanitized });
+          }}
           className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
           placeholder="+33 6 12 34 56 78"
         />
@@ -106,6 +129,12 @@ export default function ContactForm() {
           <div className="inline-flex items-center gap-2 text-green-600">
             <CheckCircle className="h-5 w-5" />
             <span>Message envoyé !</span>
+          </div>
+        )}
+        {error && (
+          <div className="inline-flex items-center gap-2 text-red-600">
+            <XCircle className="h-5 w-5" />
+            <span>{error}</span>
           </div>
         )}
       </div>
