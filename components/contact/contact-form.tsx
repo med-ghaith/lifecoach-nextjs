@@ -43,6 +43,13 @@ export default function ContactForm() {
     } else {
       setError("Une erreur s'est produite. Veuillez réessayer.");
     }
+    await fetch("/api/send-whatsapp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
   };
 
   const isFormValid = formData.name && formData.email && formData.message;
