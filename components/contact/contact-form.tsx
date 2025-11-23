@@ -12,16 +12,24 @@ export default function ContactForm() {
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
     setFormSubmitted(true);
 
+    await fetch("/api/send-whatsapp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
     // Simulate success feedback
     setTimeout(() => {
       setFormSubmitted(false);
-      setFormData({ name: "", email: "", message: "",phone:"" });
+      setFormData({ name: "", email: "", message: "", phone: "" });
     }, 2000);
   };
 
@@ -58,7 +66,7 @@ export default function ContactForm() {
         <input
           type="text"
           value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
           placeholder="+33 6 12 34 56 78"
         />
