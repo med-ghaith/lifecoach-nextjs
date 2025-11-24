@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  createBooking,
+  getBookingsByEmail,
+  cancelBooking as cancelBookingAction,
+  getBookedSlots,
+} from "@/lib/actions/booking.action";
 
 export interface Booking {
-  id?: string;
+  _id: string;
   name: string;
   email: string;
   phone?: string;
@@ -11,6 +17,7 @@ export interface Booking {
   time: string;
   status?: string;
   notes?: string;
+  package?: string;
 }
 
 export const useBookings = (userEmail?: string) => {
@@ -20,36 +27,14 @@ export const useBookings = (userEmail?: string) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [bookedSlots, setBookedSlots] = useState<Set<string>>(new Set());
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
-  // Fetch bookings on mount and when userEmail changes
   useEffect(() => {
     if (userEmail) {
       fetchBookings();
     }
   }, [userEmail]);
 
-  // Fetch all booked slots for a specific date
-  const fetchBookedSlotsForDate = async (date: string) => {
-    try {
-      const response = await fetch(`/api/bookings?date=${date}`);
-      if (response.ok) {
-        const data = await response.json();
-        const slots:any = new Set(
-          data.bookings
-            .filter(
-              (b: any) => b.status === "PENDING" || b.status === "CONFIRMED"
-            )
-            .map((b: any) => `${b.date}-${b.time}`)
-        );
-        setBookedSlots(slots);
-      }
-    } catch (err) {
-      console.error("Error fetching booked slots:", err);
-    }
-  };
-
-  // Update booked slots when date changes
   useEffect(() => {
     if (selectedDate) {
       fetchBookedSlotsForDate(selectedDate);
@@ -58,31 +43,30 @@ export const useBookings = (userEmail?: string) => {
 
   const fetchBookings = async () => {
     if (!userEmail) return;
-
     try {
       setLoading(true);
-      const response = await fetch(`/api/bookings?email=${userEmail}`);
-
-      if (response.ok) {
-        const data = await response.json();
-        setBookings(
-          data.bookings.filter(
-            (b: any) => b.status === "PENDING" || b.status === "CONFIRMED"
-          )
-        );
-      } else {
-        setError("Failed to fetch bookings");
+      const result = await getBookingsByEmail(userEmail);
+      if (result.success && result.bookings) {
+        setBookings(result.bookings);
       }
     } catch (err) {
-      setError("An error occurred while fetching bookings");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchBookedSlotsForDate = async (date: string) => {
+    try {
+      const slots = await getBookedSlots(date);
+      setBookedSlots(slots);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const isDateBooked = (isoDate: string, time: string): boolean => {
-    return bookedSlots.has(`${isoDate}-${time}`);
+    return bookedSlots.includes(time);
   };
 
   const handleBooking = async (bookingData: {
@@ -91,12 +75,7 @@ export const useBookings = (userEmail?: string) => {
     phone?: string;
   }) => {
     if (!selectedDate || !selectedTime) {
-      setError("Please select both date and time");
-      return false;
-    }
-
-    if (isDateBooked(selectedDate, selectedTime)) {
-      setError("Ce créneau est déjà réservé");
+      setError("Veuillez sélectionner une date et une heure");
       return false;
     }
 
@@ -104,33 +83,23 @@ export const useBookings = (userEmail?: string) => {
     setError(null);
 
     try {
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...bookingData,
-          date: selectedDate,
-          time: selectedTime,
-        }),
+      const result = await createBooking({
+        ...bookingData,
+        package: "single",
+        date: selectedDate,
+        time: selectedTime,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Failed to create booking");
+      if (!result.success) {
+        setError(result.error || "Erreur");
         return false;
       }
 
-      // Add to local bookings
-      setBookings((prev) => [...prev, data.booking]);
+      if (bookingData.email === userEmail && result.booking) {
+        setBookings((prev) => [...prev, result.booking]);
+      }
 
-      // Update booked slots
-      setBookedSlots((prev) =>
-        new Set(prev).add(`${selectedDate}-${selectedTime}`)
-      );
-
+      setBookedSlots((prev) => [...prev, selectedTime]);
       setShowConfirmation(true);
 
       setTimeout(() => {
@@ -141,8 +110,7 @@ export const useBookings = (userEmail?: string) => {
 
       return true;
     } catch (err) {
-      setError("An error occurred while creating the booking");
-      console.error(err);
+      setError("Une erreur est survenue");
       return false;
     } finally {
       setLoading(false);
@@ -153,30 +121,24 @@ export const useBookings = (userEmail?: string) => {
     if (!bookingId) return false;
 
     setLoading(true);
-    setError(null);
 
     try {
-      const response = await fetch(`/api/bookings/${bookingId}`, {
-        method: "DELETE",
-      });
+      const result = await cancelBookingAction(bookingId);
 
-      if (!response.ok) {
-        setError("Failed to cancel booking");
+      if (!result.success) {
+        setError(result.error || "Erreur");
         return false;
       }
 
-      // Remove from local bookings
-      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+      setBookings((prev) => prev.filter((b) => b._id !== bookingId));
 
-      // Refresh booked slots if date is selected
       if (selectedDate) {
         fetchBookedSlotsForDate(selectedDate);
       }
 
       return true;
     } catch (err) {
-      setError("An error occurred while cancelling the booking");
-      console.error(err);
+      setError("Erreur");
       return false;
     } finally {
       setLoading(false);

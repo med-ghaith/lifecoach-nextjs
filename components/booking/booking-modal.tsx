@@ -12,7 +12,7 @@ interface BookingModalProps {
     name: string;
     email: string;
     phone?: string;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   selectedDate: string | null;
   selectedTime: string | null;
   loading?: boolean;
@@ -21,10 +21,11 @@ interface BookingModalProps {
 export default function BookingModal({
   isOpen,
   onClose,
-  onSubmit,
   selectedDate,
   selectedTime,
   loading = false,
+  error = null,
+  onSubmit,
 }: BookingModalProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -39,33 +40,9 @@ export default function BookingModal({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setErr(null);
-    setSuccess(false);
-    setSubmitting(true);
-
-    const data: CreateBookingInput = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      date: selectedDate ?? undefined,
-      time: selectedTime ?? undefined,
-      package: "single",
-    };
-
-    try {
-      await createBooking(data);
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        onClose();
-      }, 3000);
-    } catch (error: any) {
-      setErr(
-        error?.message ||
-          "Un créneau est déjà réservé pour cet email, date et heure."
-      );
-    } finally {
-      setSubmitting(false);
+    const success = await onSubmit(formData);
+    if (success) {
+      setFormData({ name: "", email: "", phone: "" });
     }
   };
 
@@ -75,12 +52,19 @@ export default function BookingModal({
     return `${day}/${month}/${year}`;
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget && !loading) {
+      onClose();
+      error = null;
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 transition-opacity"
-        onClick={onClose}
+        className="fixed inset-0  bg-opacity-50 transition-opacity"
+        onClick={handleBackdropClick}
       />
 
       {/* Modal */}
@@ -89,7 +73,8 @@ export default function BookingModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+            disabled={loading}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="h-6 w-6" />
           </button>
@@ -118,6 +103,13 @@ export default function BookingModal({
               <span className="text-sm text-gray-600">(15 minutes)</span>
             </div>
           </div>
+          {/* Messages */}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 mb-4">
+              ❌ {error}
+            </div>
+          )}
 
           {/* Messages */}
           {success && (
@@ -145,11 +137,12 @@ export default function BookingModal({
                 <input
                   type="text"
                   required
+                  disabled={loading}
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                   placeholder="Votre nom"
                 />
               </div>
@@ -167,11 +160,12 @@ export default function BookingModal({
                 <input
                   type="email"
                   required
+                  disabled={loading}
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -188,11 +182,12 @@ export default function BookingModal({
                 </div>
                 <input
                   type="tel"
+                  disabled={loading}
                   value={formData.phone}
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                   placeholder="+33 6 12 34 56 78"
                 />
               </div>
@@ -210,8 +205,8 @@ export default function BookingModal({
               <button
                 type="button"
                 onClick={onClose}
-                disabled={submitting}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+                disabled={loading}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Annuler
               </button>

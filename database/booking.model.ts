@@ -87,7 +87,7 @@ BookingSchema.statics.findAvailableSlots = async function (date: string) {
     status: { $in: ["PENDING", "CONFIRMED"] },
   }).select("time");
 
-  return bookedSlots.map((booking:any) => booking.time);
+  return bookedSlots.map((booking: any) => booking.time);
 };
 
 const Booking = models.Booking || model<IBooking>("Booking", BookingSchema);

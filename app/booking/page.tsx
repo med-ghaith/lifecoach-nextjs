@@ -13,11 +13,7 @@ import { CheckCircle, AlertCircle } from "lucide-react";
 const TIME_SLOTS = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
 
 export default function BookingPage() {
-  const [userInfo, setUserInfo] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
+  const [userEmail, setUserEmail] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
 
   const {
@@ -33,7 +29,7 @@ export default function BookingPage() {
     isDateBooked,
     handleBooking,
     cancelBooking,
-  } = useBookings(userInfo.email);
+  } = useBookings(userEmail);
 
   const calendarData = useMemo(() => getCalendarData(), []);
 
@@ -45,28 +41,30 @@ export default function BookingPage() {
     setShowModal(true);
   };
 
-  const handleModalSubmit = async (data: { name: string; email: string; phone?: string }) => {
-    setUserInfo(data);
+  const handleModalSubmit = async (data: {
+    name: string;
+    email: string;
+    phone?: string;
+  }) => {
+    setUserEmail(data.email);
     const success = await handleBooking(data);
     if (success) {
       setShowModal(false);
     }
+    return success;
   };
 
   return (
-    <div className="pt-22 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h2 className="text-3xl font-bold text-gray-800 mb-6">
         Réserver une Séance
       </h2>
 
-      {error && (
+      {error && !showModal && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2 text-red-700">
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <span>{error}</span>
-          <button
-            onClick={() => setError(null)}
-            className="ml-auto text-red-500 hover:text-red-700"
-          >
+          <button onClick={() => setError(null)} className="ml-auto">
             ✕
           </button>
         </div>
@@ -111,15 +109,15 @@ export default function BookingPage() {
               {showConfirmation && (
                 <div className="inline-flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg">
                   <CheckCircle className="h-5 w-5" />
-                  <span>Réservation confirmée ! Vérifiez votre email.</span>
+                  <span>Réservé ! Vérifiez votre email.</span>
                 </div>
               )}
             </div>
           </div>
 
-          {userInfo.email && (
-            <BookingsList 
-              bookings={bookings} 
+          {userEmail && bookings.length > 0 && (
+            <BookingsList
+              bookings={bookings}
               onCancel={cancelBooking}
               loading={loading}
             />
@@ -129,7 +127,6 @@ export default function BookingPage() {
         <BookingInfo />
       </div>
 
-      {/* Booking Modal */}
       <BookingModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
