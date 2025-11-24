@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { CalendarData } from "@/types";
-import { formatISO, buildCalendarWeeks } from "@/lib/utils";
+import { formatISO, buildCalendarWeeks, getCalendarData } from "@/lib/utils";
 
 interface CalendarProps {
   selectedDate: string | null;
   onSelectDate: (date: string) => void;
+  isDayFullyBooked: (date: string) => boolean;
 }
 
 const DAYS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
@@ -28,21 +29,18 @@ const MONTHS = [
   "Décembre",
 ];
 
-const getCalendarData = (year: number, month: number): CalendarData => {
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  return { year, month, firstDay, daysInMonth };
-};
-
 export default function Calendar({
   selectedDate,
   onSelectDate,
+  isDayFullyBooked,
 }: CalendarProps) {
   const today = new Date();
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-
-  const calendarData = getCalendarData(currentYear, currentMonth);
+  const calendarData = useMemo(
+    () => getCalendarData(currentYear, currentMonth),
+    []
+  );
   const { year, month, firstDay, daysInMonth } = calendarData;
   const weeks = buildCalendarWeeks(firstDay, daysInMonth);
 
@@ -77,7 +75,6 @@ export default function Calendar({
           onClick={goToPreviousMonth}
           className="p-2 hover:bg-purple-100 rounded-full transition"
           aria-label="Mois précédent"
-          
         >
           <ChevronLeft className="h-5 w-5 text-purple-600" />
         </button>
@@ -106,16 +103,22 @@ export default function Calendar({
 
         {weeks.flat().map((day, idx) => {
           if (day === null) return <div key={idx} className="py-3" />;
+
           const iso = formatISO(year, month, day);
+
+          // Check if the day is fully booked
+          const disabledDay = isDayFullyBooked(iso); // use iso here, not selectedDate
+
           return (
             <button
               key={iso}
               onClick={() => onSelectDate(iso)}
+              disabled={disabledDay}
               className={`py-3 rounded-md transition ${
                 selectedDate === iso
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-600 text-white border-transparent"
                   : "hover:bg-purple-50"
-              }`}
+              } ${disabledDay ? "opacity-40 cursor-not-allowed" : ""}`}
             >
               {day}
             </button>

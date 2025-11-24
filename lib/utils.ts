@@ -6,10 +6,7 @@ export const formatISO = (year: number, month: number, day: number): string => {
   return `${year}-${mm}-${dd}`;
 };
 
-export const getCalendarData = (): CalendarData => {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = date.getMonth();
+export const getCalendarData = (year: number, month: number): CalendarData => {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   return { year, month, firstDay, daysInMonth };

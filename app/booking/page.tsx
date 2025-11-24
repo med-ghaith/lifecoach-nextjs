@@ -10,12 +10,11 @@ import { useBookings } from "@/hooks/use-bookings";
 import { getCalendarData } from "@/lib/utils";
 import { CheckCircle, AlertCircle } from "lucide-react";
 
-const TIME_SLOTS = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
+export const TIME_SLOTS = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
 
 export default function BookingPage() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
-
   const {
     bookings,
     selectedDate,
@@ -25,13 +24,12 @@ export default function BookingPage() {
     error,
     setSelectedDate,
     setSelectedTime,
+    isDayFullyBooked,
     setError,
     isDateBooked,
     handleBooking,
     cancelBooking,
   } = useBookings(userEmail);
-
-  const calendarData = useMemo(() => getCalendarData(), []);
 
   const handleReserverClick = () => {
     if (!selectedDate || !selectedTime) {
@@ -74,7 +72,7 @@ export default function BookingPage() {
         <div className="md:col-span-2">
           <div className="bg-white rounded-lg shadow p-6">
             <Calendar
-              calendarData={calendarData}
+              isDayFullyBooked={isDayFullyBooked}
               selectedDate={selectedDate}
               onSelectDate={(date) => {
                 setSelectedDate(date);

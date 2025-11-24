@@ -6,7 +6,9 @@ import {
   getBookingsByEmail,
   cancelBooking as cancelBookingAction,
   getBookedSlots,
+  getBookings,
 } from "@/lib/actions/booking.action";
+import { TIME_SLOTS } from "@/app/booking/page";
 
 export interface Booking {
   _id: string;
@@ -28,7 +30,22 @@ export const useBookings = (userEmail?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
 
+  useEffect(() => {
+    fetchAllBookings(); // fetch all bookings from the server
+  }, []);
+
+  const fetchAllBookings = async () => {
+    try {
+      const result = await getBookings(); // implement this API call
+      if (result.success && result.bookings) {
+        setAllBookings(result.bookings);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   useEffect(() => {
     if (userEmail) {
       fetchBookings();
@@ -67,6 +84,12 @@ export const useBookings = (userEmail?: string) => {
 
   const isDateBooked = (isoDate: string, time: string): boolean => {
     return bookedSlots.includes(time);
+  };
+  const isDayFullyBooked = (date: string) => {
+    const bookingsForDay = allBookings.filter((b) => b.date === date);
+    return TIME_SLOTS.every((slot) =>
+      bookingsForDay.some((b) => b.time === slot)
+    );
   };
 
   const handleBooking = async (bookingData: {
@@ -159,5 +182,6 @@ export const useBookings = (userEmail?: string) => {
     handleBooking,
     cancelBooking,
     fetchBookings,
+    isDayFullyBooked,
   };
 };

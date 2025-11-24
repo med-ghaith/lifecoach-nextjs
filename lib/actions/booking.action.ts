@@ -134,6 +134,26 @@ export async function getBookingsByEmail(email: string) {
     };
   }
 }
+// Get bookings  
+export async function getBookings() {
+  try {
+    await connectDB();
+    const bookings = await Booking.find()
+      .sort({ date: 1, time: 1 })
+      .lean();
+
+    return {
+      success: true,
+      bookings: JSON.parse(JSON.stringify(bookings)),
+    };
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    return {
+      success: false,
+      error: "Échec de la récupération des réservations",
+    };
+  }
+}
 
 // Cancel booking
 export async function cancelBooking(bookingId: string) {
