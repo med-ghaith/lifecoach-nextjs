@@ -7,29 +7,57 @@ export const formatISO = (year: number, month: number, day: number): string => {
 };
 
 export const getCalendarData = (year: number, month: number): CalendarData => {
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+  const daysInMonth = new Date(year, month + 1, 0).getDate(); // last day of month
   return { year, month, firstDay, daysInMonth };
 };
 
 export const buildCalendarWeeks = (
-  firstDay: number,
+  firstDayOfMonth: number, // 0 = Sunday, 1 = Monday, etc.
   daysInMonth: number
 ): (number | null)[][] => {
   const weeks: (number | null)[][] = [];
-  let dayCounter = 1 - firstDay;
+  let currentDay = 1;
 
-  while (dayCounter <= daysInMonth) {
+  while (currentDay <= daysInMonth) {
     const week: (number | null)[] = [];
+
     for (let i = 0; i < 7; i++) {
-      if (dayCounter < 1 || dayCounter > daysInMonth) {
+      // Fill empty cells before the first day of the month
+      if (weeks.length === 0 && i < firstDayOfMonth) {
+        week.push(null);
+      } else if (currentDay > daysInMonth) {
+        // Fill empty cells after the last day of the month
         week.push(null);
       } else {
-        week.push(dayCounter);
+        week.push(currentDay);
+        currentDay++;
       }
-      dayCounter++;
     }
+
     weeks.push(week);
   }
+
   return weeks;
+};
+
+export const isPastDate = (year: number, month: number, day: number) => {
+  const today = new Date();
+
+  // If the year is in the past → disable
+  if (year < today.getFullYear()) return true;
+
+  // If the year is current, but month is in the past → disable
+  if (year === today.getFullYear() && month < today.getMonth()) return true;
+
+  // If the year and month are current, but day is in the past → disable
+  if (
+    year === today.getFullYear() &&
+    month === today.getMonth() &&
+    day < today.getDate()
+  )
+    return true;
+
+  // Otherwise → not past
+  return false;
 };

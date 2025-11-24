@@ -7,7 +7,6 @@ import BookingInfo from "@/components/booking/booking-info";
 import BookingsList from "@/components/booking/bookings-list";
 import BookingModal from "@/components/booking/booking-modal";
 import { useBookings } from "@/hooks/use-bookings";
-import { getCalendarData } from "@/lib/utils";
 import { CheckCircle, AlertCircle } from "lucide-react";
 
 export const TIME_SLOTS = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
@@ -18,6 +17,10 @@ export default function BookingPage() {
   const {
     bookings,
     selectedDate,
+    currentYear,
+    currentMonth,
+    goToPreviousMonth,
+    goToNextMonth,
     selectedTime,
     showConfirmation,
     loading,
@@ -74,6 +77,10 @@ export default function BookingPage() {
             <Calendar
               isDayFullyBooked={isDayFullyBooked}
               selectedDate={selectedDate}
+              goToNextMonth={goToNextMonth}
+              currentMonth={currentMonth}
+              currentYear={currentYear}
+              goToPreviousMonth={goToPreviousMonth}
               onSelectDate={(date) => {
                 setSelectedDate(date);
                 setSelectedTime(null);
@@ -113,13 +120,13 @@ export default function BookingPage() {
             </div>
           </div>
 
-          {userEmail && bookings.length > 0 && (
+          {/* {userEmail && bookings.length > 0 && (
             <BookingsList
               bookings={bookings}
               onCancel={cancelBooking}
               loading={loading}
             />
-          )}
+          )} */}
         </div>
 
         <BookingInfo />

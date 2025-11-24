@@ -5,11 +5,15 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { CalendarData } from "@/types";
-import { formatISO, buildCalendarWeeks, getCalendarData } from "@/lib/utils";
+import { formatISO, buildCalendarWeeks, getCalendarData, isPastDate } from "@/lib/utils";
 
 interface CalendarProps {
   selectedDate: string | null;
+  currentYear: number;
+  currentMonth: number ;
   onSelectDate: (date: string) => void;
+  goToNextMonth: () => void;
+  goToPreviousMonth: () => void;
   isDayFullyBooked: (date: string) => boolean;
 }
 
@@ -31,36 +35,22 @@ const MONTHS = [
 
 export default function Calendar({
   selectedDate,
+  currentMonth,
+  currentYear,
   onSelectDate,
+  goToPreviousMonth,
+  goToNextMonth,
   isDayFullyBooked,
 }: CalendarProps) {
-  const today = new Date();
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const calendarData = useMemo(
     () => getCalendarData(currentYear, currentMonth),
     []
   );
-  const { year, month, firstDay, daysInMonth } = calendarData;
+  const { year, month} = calendarData;
+const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
   const weeks = buildCalendarWeeks(firstDay, daysInMonth);
-
-  const goToPreviousMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
-  };
-
-  const goToNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-  };
 
   return (
     <>
@@ -104,10 +94,12 @@ export default function Calendar({
         {weeks.flat().map((day, idx) => {
           if (day === null) return <div key={idx} className="py-3" />;
 
-          const iso = formatISO(year, month, day);
+          const pad = (n: number) => n.toString().padStart(2, "0");
+          const iso = `${year}-${pad(month + 1)}-${pad(day)}`; // YYYY-MM-DD
 
-          // Check if the day is fully booked
-          const disabledDay = isDayFullyBooked(iso); // use iso here, not selectedDate
+          const disabledDay =
+            isPastDate(currentYear, currentMonth, day) ||
+            isDayFullyBooked(iso); // Disable past or fully booked
 
           return (
             <button
