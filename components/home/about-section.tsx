@@ -1,4 +1,5 @@
 import { CheckCircle, Star, Sparkles } from "lucide-react";
+import Image from "next/image";
 
 export default function AboutSection() {
   return (
@@ -41,9 +42,14 @@ export default function AboutSection() {
             </div>
           </div>
         </div>
-        <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-8 h-96 flex items-center justify-center">
+        <div className="bg-gradient-to-br relative from-purple-100 to-pink-100 rounded-2xl p-8 h-96 flex items-center justify-center">
           <div className="text-center">
-            <Sparkles className="h-24 w-24 text-purple-600 mx-auto mb-4" />
+            <Image
+              src="/images/anxiety-management.jpeg"
+              alt="about me"
+              fill
+              className="object-cover transition-transform duration-300 hover:scale-110"
+            />
             <p className="text-gray-700 italic text-lg font-medium mb-2">
               "Les sirènes naissent de la contrainte dont elles s'extraient
               autant que de la liberté qu'elles s'offrent."
