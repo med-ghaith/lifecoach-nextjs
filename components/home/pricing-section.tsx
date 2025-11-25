@@ -28,9 +28,11 @@ export default function PricingSection() {
         setIsLoading(true);
         setError(null);
         const res = await getAllPackages();
-        setPackages(
-          packages.map((pkg) => ({ ...pkg, _id: pkg._id.toString() }))
-        );
+        const formattedPackages = res.map((pkg) => ({
+          ...pkg,
+          _id: pkg._id.toString(),
+        }));
+        setPackages(formattedPackages);
       } catch (error) {
         console.error("Failed to fetch packages:", error);
         setError("Impossible de charger les forfaits. Veuillez réessayer.");
@@ -41,7 +43,7 @@ export default function PricingSection() {
 
     fetchPackages();
   }, []);
-
+  console.log(packages);
   return (
     <div className="bg-gray-50 dark:bg-gray-900 py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
