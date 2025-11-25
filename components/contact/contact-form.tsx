@@ -63,7 +63,7 @@ export default function ContactForm() {
           type="text"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 placeholder-gray-400 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
           placeholder="Votre nom"
         />
       </div>
@@ -75,7 +75,7 @@ export default function ContactForm() {
           type="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 placeholder-gray-400 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
           placeholder="votre@email.com"
         />
       </div>
@@ -90,7 +90,7 @@ export default function ContactForm() {
             const sanitized = e.target.value.replace(/[^0-9+]/g, "");
             setFormData({ ...formData, phone: sanitized });
           }}
-          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          className="mt-2 w-full rounded-lg border focus:outline-none border-gray-300 placeholder-gray-400 p-3 shadow-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
           placeholder="+33 6 12 34 56 78"
         />
       </div>
@@ -106,7 +106,7 @@ export default function ContactForm() {
           onChange={(e) =>
             setFormData({ ...formData, message: e.target.value })
           }
-          className="mt-2 w-full rounded-lg border border-gray-300 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+          className="mt-2 w-full rounded-lg border border-gray-300 placeholder-gray-400 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
           placeholder="Votre message..."
         />
       </div>

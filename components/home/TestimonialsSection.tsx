@@ -39,10 +39,10 @@ export default function TestimonialsSection() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div className="text-center mb-16">
-        <h2 className="text-4xl font-bold text-gray-800 mb-4">
+        <h2 className="text-4xl font-bold text-white-100 mb-4 ">
           Témoignages de Patients
         </h2>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-gray-400 max-w-3xl mx-auto ">
           Découvrez ce que mes accompagnements ont permis à mes clients de
           transformer dans leur vie.
         </p>

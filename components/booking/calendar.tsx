@@ -58,7 +58,9 @@ export default function Calendar({
     <>
       <div className="flex items-center mb-4">
         <CalendarIcon className="h-6 w-6 text-purple-600 mr-2" />
-        <h3 className="text-lg font-semibold">Sélectionner une Date</h3>
+        <h3 className="text-lg font-semibold text-black">
+          Sélectionner une Date
+        </h3>
       </div>
 
       {/* Month Navigation */}
@@ -88,7 +90,7 @@ export default function Calendar({
 
       <div className="grid grid-cols-7 gap-2 text-center text-sm">
         {DAYS.map((day) => (
-          <div key={day} className="font-medium text-gray-500 py-1">
+          <div key={day} className="font-medium text-black py-1">
             {day}
           </div>
         ))}
@@ -106,8 +108,8 @@ export default function Calendar({
             <button
               key={iso}
               onClick={() => onSelectDate(iso)}
-              disabled={disabledDay }
-              className={`py-3 rounded-md transition ${
+              disabled={disabledDay}
+              className={`py-3 rounded-md transition text-black ${
                 selectedDate === iso
                   ? "bg-purple-600 text-white border-transparent"
                   : "hover:bg-purple-50"
