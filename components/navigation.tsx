@@ -48,7 +48,6 @@ export default function Navigation() {
                 {link.label}
               </Link>
             ))}
-
             {/* Theme Toggle */}
             <div className="ml-4">
               <ThemeToggle />
