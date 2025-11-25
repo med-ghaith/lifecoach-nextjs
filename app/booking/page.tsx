@@ -1,23 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {useState } from "react";
 import Calendar from "@/components/booking/calendar";
 import TimeSlots from "@/components/booking/time-slots";
 import BookingInfo from "@/components/booking/booking-info";
-import BookingsList from "@/components/booking/bookings-list";
 import BookingModal from "@/components/booking/booking-modal";
 import { useBookings } from "@/hooks/use-bookings";
 import { CheckCircle, AlertCircle } from "lucide-react";
-import { isPastDate } from "@/lib/utils";
 
 export const TIME_SLOTS = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
 
 export default function BookingPage() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
-  const [past, setPast] = useState(false);
   const {
-    bookings,
     selectedDate,
     currentYear,
     currentMonth,
@@ -33,7 +29,6 @@ export default function BookingPage() {
     setError,
     isDateBooked,
     handleBooking,
-    cancelBooking,
   } = useBookings(userEmail);
 
     
