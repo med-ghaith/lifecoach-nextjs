@@ -1,8 +1,9 @@
 "use server";
 import Package, { IPackage } from "@/database/package.modal";
 import connectDB from "../mongodb";
+import { PackageType } from "@/types";
 
-interface PackageInput {
+export interface PackageInput {
   name: string;
   price: number;
   SeanceNumber: number;
@@ -15,12 +16,12 @@ interface PackageInput {
 // create package
 export async function createPackage(
   data: PackageInput
-): Promise<IPackage | null> {
+): Promise<PackageType | null> {
   try {
     await connectDB();
 
     const newPackage = await Package.create(data);
-    return newPackage;
+    return JSON.parse(JSON.stringify(newPackage));
   } catch (error) {
     console.error("Error creating package:", error);
     return null;
@@ -33,11 +34,37 @@ export async function getAllPackages(): Promise<IPackage[]> {
     await connectDB();
 
     const packages = await Package.find().sort({
-      price:1
+      price: 1,
     });
     return JSON.parse(JSON.stringify(packages));
   } catch (error) {
     console.error("Error fetching packages:", error);
     return [];
+  }
+}
+export async function updatePackage(
+  id: string,
+  data: Partial<PackageInput>
+): Promise<PackageType | null> {
+  try {
+    await connectDB();
+    const updatedPackage = await Package.findByIdAndUpdate(id, data, {
+      new: true,
+    });
+    return updatedPackage ? JSON.parse(JSON.stringify(updatedPackage)) : null;
+  } catch (error) {
+    console.error("Error updating package:", error);
+    return null;
+  }
+}
+
+export async function deletePackage(id: string): Promise<boolean> {
+  try {
+    await connectDB();
+    const result = await Package.findByIdAndDelete(id);
+    return result ? true : false;
+  } catch (error) {
+    console.error("Error deleting package:", error);
+    return false;
   }
 }

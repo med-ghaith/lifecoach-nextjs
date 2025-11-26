@@ -1,7 +1,7 @@
 // app/admin/page.tsx or components/AdminDashboard.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Package, Calendar, Clock, CheckCircle } from "lucide-react";
 import { PackageType, BookingType, BookingStatus } from "@/types";
 import PackageModal from "@/components/admin/package-modal";
@@ -10,6 +10,14 @@ import PackagesTable from "@/components/admin/package-tab";
 import AdminTabs from "@/components/admin/admin-tab";
 import StatsCard from "@/components/admin/stats-cards";
 import TimeSlotsAdmin from "@/components/admin/timeslot-tab";
+import { IPackage } from "@/database/package.modal";
+import {
+  createPackage,
+  deletePackage,
+  getAllPackages,
+  PackageInput,
+  updatePackage,
+} from "@/lib/actions/package.action";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<
@@ -20,27 +28,23 @@ export default function AdminDashboard() {
   const [selectedItem, setSelectedItem] = useState<PackageType | null>(null);
 
   // Sample data - replace with your API calls
-  const [packages, setPackages] = useState<PackageType[]>([
-    {
-      _id: "1",
-      name: "Séance Découverte",
-      price: 60,
-      SeanceNumber: 1,
-      duration: "1h",
-      features: ["Entretien personnalisé", "Définition des objectifs"],
-      badge: "Populaire",
-    },
-    {
-      _id: "2",
-      name: "Forfait 5 séances",
-      price: 275,
-      SeanceNumber: 5,
-      duration: "5h",
-      features: ["5 séances d'1h", "Suivi personnalisé", "Support email"],
-      highlighted: true,
-      discount: 10,
-    },
-  ]);
+  const [packages, setPackages] = useState<PackageType[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const data: any = await getAllPackages();
+        setPackages(data);
+      } catch (error) {
+        console.error("Failed to fetch packages:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
 
   const [bookings, setBookings] = useState<BookingType[]>([
     {
@@ -58,7 +62,7 @@ export default function AdminDashboard() {
     },
   ]);
 
-  const [formData, setFormData] = useState<Partial<PackageType>>({
+  const [formData, setFormData] = useState<Partial<PackageInput>>({
     name: "",
     price: 0,
     features: [""],
@@ -77,27 +81,46 @@ export default function AdminDashboard() {
     setShowModal(true);
   };
 
-  const handleDeletePackage = (id: string) => {
+  const handleDeletePackage = async (id: string) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce forfait ?")) {
       setPackages(packages.filter((p) => p._id !== id));
     }
+    try {
+      const success = await deletePackage(id);
+      if (success) {
+        setPackages(packages.filter((p) => p._id !== id));
+        alert("Package deleted successfully!");
+      } else {
+        alert("Failed to delete package.");
+      }
+    } catch (error) {
+      console.error("Delete package error:", error);
+      alert("Error deleting package.");
+    }
   };
 
-  const handleSavePackage = () => {
+  const handleSavePackage = async () => {
     if (modalMode === "create") {
-      const newPackage = {
-        ...formData,
-        _id: Date.now().toString(),
-      } as PackageType;
-      setPackages([...packages, newPackage]);
-    } else {
-      setPackages(
-        packages.map((p) =>
-          p._id === selectedItem?._id
-            ? ({ ...formData, _id: p._id } as PackageType)
-            : p
-        )
+      const newPkg = await createPackage(formData as PackageInput);
+      console.log(formData as PackageInput, "++++++");
+      if (newPkg)
+        setPackages([
+          ...packages,
+          {
+            ...newPkg,
+            _id: newPkg._id.toString(),
+          },
+        ]);
+    } else if (selectedItem) {
+      const updatedPkg = await updatePackage(
+        selectedItem._id,
+        formData as Partial<PackageInput>
       );
+      if (updatedPkg) {
+        setPackages(
+          packages.map((p) => (p._id === updatedPkg._id ? updatedPkg : p))
+        );
+      }
     }
     setShowModal(false);
   };
