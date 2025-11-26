@@ -28,7 +28,11 @@ export default function PricingSection() {
         setIsLoading(true);
         setError(null);
         const res = await getAllPackages();
-        setPackages(res);
+        const formattedPackages = res.map((pkg) => ({
+          ...pkg,
+          _id: pkg._id.toString(),
+        }));
+        setPackages(formattedPackages);
       } catch (error) {
         console.error("Failed to fetch packages:", error);
         setError("Impossible de charger les forfaits. Veuillez réessayer.");
@@ -39,22 +43,21 @@ export default function PricingSection() {
 
     fetchPackages();
   }, []);
-
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 py-20">
+    <div className="  py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-4">
+        <h2 className="text-4xl font-bold text-center  text-white-100 mb-4">
           Les Tarifs
         </h2>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+        <p className="text-center text-gray-400 mb-12 max-w-3xl text-lg mx-auto">
           Choisissez la formule qui correspond à vos besoins et à votre rythme
         </p>
 
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-12 w-12 text-purple-600 dark:text-purple-400 animate-spin mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
+            <Loader2 className="h-12 w-12 text-purple-600  animate-spin mb-4" />
+            <p className="text-gray-600  text-lg">
               Chargement des forfaits...
             </p>
           </div>
@@ -72,7 +75,7 @@ export default function PricingSection() {
                     className={`rounded-xl shadow-lg p-6 hover:shadow-2xl transition flex flex-col ${
                       pkg.highlighted
                         ? "bg-gradient-to-br from-purple-600 to-pink-500 transform scale-105"
-                        : "bg-white dark:bg-gray-800 transform hover:-translate-y-1"
+                        : "bg-white   transform hover:-translate-y-1"
                     }`}
                   >
                     <div>
@@ -86,7 +89,7 @@ export default function PricingSection() {
                       className={`text-xl font-bold mb-2 ${
                         pkg.highlighted
                           ? "text-white"
-                          : "text-gray-800 dark:text-gray-100"
+                          : "text-gray-800 "
                       }`}
                     >
                       {pkg.name}
@@ -99,7 +102,7 @@ export default function PricingSection() {
                               className={`text-lg font-semibold line-through opacity-60 ${
                                 pkg.highlighted
                                   ? "text-white/70"
-                                  : "text-gray-400 dark:text-gray-500"
+                                  : "text-gray-400 "
                               }`}
                             >
                               {pkg.price}€
@@ -108,7 +111,7 @@ export default function PricingSection() {
                               className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                                 pkg.highlighted
                                   ? "bg-white/20 text-white"
-                                  : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                                  : "bg-red-100 text-red-600 "
                               }`}
                             >
                               -{pkg.discount}%
@@ -118,7 +121,7 @@ export default function PricingSection() {
                             className={`text-3xl font-bold ${
                               pkg.highlighted
                                 ? "text-white"
-                                : "text-purple-600 dark:text-purple-400"
+                                : "text-purple-600"
                             }`}
                           >
                             {(pkg.price * (1 - pkg.discount / 100)).toFixed(2)}€
@@ -129,7 +132,7 @@ export default function PricingSection() {
                           className={`text-3xl font-bold ${
                             pkg.highlighted
                               ? "text-white"
-                              : "text-purple-600 dark:text-purple-400"
+                              : "text-purple-600 "
                           }`}
                         >
                           {pkg.price}€
@@ -141,7 +144,7 @@ export default function PricingSection() {
                         className={`text-sm mb-4 ${
                           pkg.highlighted
                             ? "text-white/80"
-                            : "text-gray-500 dark:text-gray-400"
+                            : "text-gray-500"
                         }`}
                       >
                         {pkg.discount
@@ -158,7 +161,7 @@ export default function PricingSection() {
                         className={`text-sm mb-4 ${
                           pkg.highlighted
                             ? "text-white/80"
-                            : "text-gray-500 dark:text-gray-400"
+                            : "text-gray-500"
                         }`}
                       >
                         {pkg.duration}
@@ -171,14 +174,14 @@ export default function PricingSection() {
                             className={`h-4 w-4 mr-2 mt-0.5 flex-shrink-0 ${
                               pkg.highlighted
                                 ? "text-white"
-                                : "text-purple-600 dark:text-purple-400"
+                                : "text-purple-600"
                             }`}
                           />
                           <span
                             className={
                               pkg.highlighted
                                 ? "text-white"
-                                : "text-gray-600 dark:text-gray-300"
+                                : "text-gray-600"
                             }
                           >
                             {feature}
@@ -191,7 +194,7 @@ export default function PricingSection() {
                       className={`block w-full text-center py-2.5 rounded-lg transition font-semibold text-sm ${
                         pkg.highlighted
                           ? "bg-white text-purple-600 hover:bg-purple-100"
-                          : "bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
+                          : "bg-purple-600 text-white hover:bg-purple-700 "
                       }`}
                     >
                       Réserver
@@ -263,7 +266,7 @@ export default function PricingSection() {
         {/* Empty State */}
         {!isLoading && !error && packages.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
+            <p className="text-gray-600  text-lg">
               Aucun forfait disponible pour le moment.
             </p>
           </div>
