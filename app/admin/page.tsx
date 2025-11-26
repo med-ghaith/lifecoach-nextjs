@@ -10,7 +10,6 @@ import PackagesTable from "@/components/admin/package-tab";
 import AdminTabs from "@/components/admin/admin-tab";
 import StatsCard from "@/components/admin/stats-cards";
 import TimeSlotsAdmin from "@/components/admin/timeslot-tab";
-import { IPackage } from "@/database/package.modal";
 import {
   createPackage,
   deletePackage,
@@ -18,6 +17,8 @@ import {
   PackageInput,
   updatePackage,
 } from "@/lib/actions/package.action";
+import ConfirmModal from "@/components/admin/ConfirmModal";
+import { Toast } from "@/components/Toast";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<
@@ -30,6 +31,11 @@ export default function AdminDashboard() {
   // Sample data - replace with your API calls
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -81,21 +87,34 @@ export default function AdminDashboard() {
     setShowModal(true);
   };
 
-  const handleDeletePackage = async (id: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce forfait ?")) {
-      setPackages(packages.filter((p) => p._id !== id));
-    }
+  const handleDeletePackage = (id: string) => {
+    setDeleteId(id); // opens the confirmation modal
+  };
+  const confirmDeletePackage = async () => {
+    if (!deleteId) return;
+
     try {
-      const success = await deletePackage(id);
+      const success = await deletePackage(deleteId);
       if (success) {
-        setPackages(packages.filter((p) => p._id !== id));
-        alert("Package deleted successfully!");
+        setPackages(packages.filter((p) => p._id !== deleteId));
+        setToast({
+          message: "Forfait supprimé avec succès !",
+          type: "success",
+        });
       } else {
-        alert("Failed to delete package.");
+        setToast({
+          message: "Échec de la suppression du forfait.",
+          type: "error",
+        });
       }
     } catch (error) {
       console.error("Delete package error:", error);
-      alert("Error deleting package.");
+      setToast({
+        message: "Erreur lors de la suppression du forfait.",
+        type: "error",
+      });
+    } finally {
+      setDeleteId(null); // close the confirmation modal
     }
   };
 
@@ -190,7 +209,20 @@ export default function AdminDashboard() {
             onCreate={handleCreatePackage}
           />
         )}
+        <ConfirmModal
+          isOpen={!!deleteId}
+          message="Êtes-vous sûr de vouloir supprimer ce forfait ?"
+          onConfirm={confirmDeletePackage}
+          onCancel={() => setDeleteId(null)}
+        />
 
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
         {/* Bookings Tab */}
         {activeTab === "bookings" && (
           <BookingsTable

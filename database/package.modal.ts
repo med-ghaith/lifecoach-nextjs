@@ -36,6 +36,11 @@ const PackageSchema = new Schema<IPackage>(
       required: [true, "La durée est requise"],
       trim: true,
     },
+    badge: {
+      type: String,
+      required: [false, "La badge est requise"],
+      trim: true,
+    },
     features: {
       type: [String],
       required: true,

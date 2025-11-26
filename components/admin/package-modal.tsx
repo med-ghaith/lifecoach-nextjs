@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { X, Plus, Trash2 } from "lucide-react";
-import { PackageInput } from "@/lib/actions/package.action";
+import { PackageType } from "@/types";
 
 interface PackageModalProps {
   isOpen: boolean;
   mode: "create" | "edit";
-  formData: Partial<PackageInput>;
+  formData: Partial<PackageType>;
   onClose: () => void;
   onSave: () => void;
-  onFormChange: (data: Partial<PackageInput>) => void;
+  onFormChange: (data: Partial<PackageType>) => void;
 }
 
 export default function PackageModal({
@@ -48,9 +48,17 @@ export default function PackageModal({
     onFormChange({ ...formData, features: newFeatures });
   };
 
+  const toggleBooleanField = (field: "highlighted" | "fullWidth") => {
+    onFormChange({
+      ...formData,
+      [field]: !formData[field],
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
             {mode === "create" ? "Nouveau Forfait" : "Modifier le Forfait"}
@@ -63,6 +71,7 @@ export default function PackageModal({
           </button>
         </div>
 
+        {/* Body */}
         <div className="p-6 space-y-4">
           {/* Name */}
           <div>
@@ -95,15 +104,20 @@ export default function PackageModal({
               </label>
               <input
                 id="package-price"
-                type="number"
-                value={formData.price || 0}
-                onChange={(e) =>
-                  onFormChange({ ...formData, price: Number(e.target.value) })
-                }
+                type="text"
+                value={formData.price?.toString() || ""}
+                onChange={(e) => {
+                  const numericValue = e.target.value.replace(/[^0-9]/g, "");
+                  onFormChange({
+                    ...formData,
+                    price: numericValue ? Number(numericValue) : 0,
+                  });
+                }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Prix (€)"
               />
             </div>
+
             <div>
               <label
                 htmlFor="package-discount"
@@ -113,14 +127,15 @@ export default function PackageModal({
               </label>
               <input
                 id="package-discount"
-                type="number"
-                value={formData.remis || ""}
-                onChange={(e) =>
+                type="text"
+                value={formData.discount?.toString() || ""}
+                onChange={(e) => {
+                  const numericValue = e.target.value.replace(/[^0-9]/g, "");
                   onFormChange({
                     ...formData,
-                    remis: Number(e.target.value) || undefined,
-                  })
-                }
+                    discount: numericValue ? Number(numericValue) : undefined,
+                  });
+                }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Remise (%)"
               />
@@ -138,18 +153,22 @@ export default function PackageModal({
               </label>
               <input
                 id="package-seancenumber"
-                type="number"
-                value={formData.SeanceNumber || 0}
-                onChange={(e) =>
+                type="text"
+                value={formData.SeanceNumber?.toString() || ""}
+                onChange={(e) => {
+                  const numericValue = e.target.value.replace(/[^0-9]/g, "");
                   onFormChange({
                     ...formData,
-                    SeanceNumber: Number(e.target.value),
-                  })
-                }
+                    SeanceNumber: numericValue
+                      ? Number(numericValue)
+                      : undefined,
+                  });
+                }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Nombre de Séances"
               />
             </div>
+
             <div>
               <label
                 htmlFor="package-duration"
@@ -166,6 +185,20 @@ export default function PackageModal({
                 }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="Ex: 1h, 45min"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Badge
+              </label>
+              <input
+                type="text"
+                value={formData.badge || ""}
+                onChange={(e) =>
+                  onFormChange({ ...formData, badge: e.target.value })
+                }
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Badge"
               />
             </div>
           </div>
@@ -208,6 +241,26 @@ export default function PackageModal({
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* Optional fields: Highlighted, FullWidth, Badge */}
+          <div className="flex flex-col md:flex-row gap-4 mt-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!formData.highlighted}
+                onChange={() => toggleBooleanField("highlighted")}
+              />
+              <label className="text-white">Highlighted</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!formData.fullWidth}
+                onChange={() => toggleBooleanField("fullWidth")}
+              />
+              <label className="text-white">Full Width</label>
             </div>
           </div>
         </div>
