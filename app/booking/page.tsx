@@ -1,14 +1,22 @@
 "use client";
 
-import {useState } from "react";
+import { useState } from "react";
 import Calendar from "@/components/booking/calendar";
 import TimeSlots from "@/components/booking/time-slots";
 import BookingInfo from "@/components/booking/booking-info";
 import BookingModal from "@/components/booking/booking-modal";
 import { useBookings } from "@/hooks/use-bookings";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { useTimeSlots } from "@/hooks/use-timeslots";
 
-export const TIME_SLOTS = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
+export const TIME_SLOTS = [
+  "09:00",
+  "10:30",
+  "12:00",
+  "14:00",
+  "15:30",
+  "17:00",
+];
 
 export default function BookingPage() {
   const [userEmail, setUserEmail] = useState<string>("");
@@ -30,8 +38,12 @@ export default function BookingPage() {
     isDateBooked,
     handleBooking,
   } = useBookings(userEmail);
+  const {
+    availableTimes,
+    loading: timeSlotsLoading,
+    error: timeSlotsError,
+  } = useTimeSlots(selectedDate);
 
-    
   const handleReserverClick = () => {
     if (!selectedDate || !selectedTime) {
       setError("Veuillez sélectionner une date et une heure");
@@ -55,9 +67,7 @@ export default function BookingPage() {
 
   return (
     <div className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h2 className="text-3xl font-bold mb-6">
-        Réserver une Séance
-      </h2>
+      <h2 className="text-3xl font-bold mb-6">Réserver une Séance</h2>
 
       {error && !showModal && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2 text-red-700">
@@ -66,6 +76,13 @@ export default function BookingPage() {
           <button onClick={() => setError(null)} className="ml-auto">
             ✕
           </button>
+        </div>
+      )}
+
+      {timeSlotsError && (
+        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-2 text-yellow-700">
+          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <span>{timeSlotsError}</span>
         </div>
       )}
 
@@ -86,16 +103,34 @@ export default function BookingPage() {
               }}
             />
 
-            <TimeSlots
-              timeSlots={TIME_SLOTS}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              onSelectTime={(time) => {
-                setSelectedTime(time);
-                setError(null);
-              }}
-              isDateBooked={isDateBooked}
-            />
+            {timeSlotsLoading ? (
+              <div className="mt-6 flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                <span className="ml-2 text-gray-600">
+                  Chargement des créneaux...
+                </span>
+              </div>
+            ) : availableTimes.length === 0 && selectedDate ? (
+              <div className="mt-6 text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">
+                  Aucun créneau disponible pour ce jour.
+                </p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Veuillez sélectionner un autre jour.
+                </p>
+              </div>
+            ) : (
+              <TimeSlots
+                timeSlots={availableTimes}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                onSelectTime={(time) => {
+                  setSelectedTime(time);
+                  setError(null);
+                }}
+                isDateBooked={isDateBooked}
+              />
+            )}
 
             <div className="mt-6 flex items-center gap-4">
               <button
