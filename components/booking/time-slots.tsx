@@ -17,8 +17,8 @@ export default function TimeSlots({
 }: TimeSlotsProps) {
   return (
     <div className="mt-6">
-      <h4 className="font-semibold mb-2">Choisir une heure</h4>
-      <div className="flex flex-wrap gap-3">
+      <h4 className="font-semibold mb-2 text-black">Choisir une heure</h4>
+      <div className="flex flex-wrap gap-3 text-black">
         {timeSlots.map((time) => {
           const disabled = selectedDate
             ? isDateBooked(selectedDate, time)
