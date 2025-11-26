@@ -6,7 +6,8 @@ export interface LoginResult {
   success: boolean;
   message?: string;
   user?: Omit<typeof User, "password">;
-  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 export async function loginUser(
@@ -29,13 +30,18 @@ export async function loginUser(
     const { password: _, ...userWithoutPassword } = user;
 
     // Create JWT token
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
-
-    return { success: true, user: userWithoutPassword, token };
+    const refreshToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_REFRESH_SECRET!,
+      { expiresIn: "1h" }
+    );
+   
+    return { success: true, user: userWithoutPassword, accessToken, refreshToken };
   } catch (error) {
     console.error("Error logging in:", error);
     return { success: false, message: "Erreur du serveur" };

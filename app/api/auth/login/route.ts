@@ -24,13 +24,19 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ success: true, user: result.user });
 
   // Set HTTP-only cookie
-  res.cookies.set("token", result.token!, {
+  res.cookies.set("token", result.accessToken!, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 3600, // 1 hour
     path: "/admin",
   });
-
+  res.cookies.set("refreshToken", result.refreshToken!, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60, // 7d
+    path: "/api/auth/refresh", // only accessible in refresh endpoint
+  });
   return res;
 }
