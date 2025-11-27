@@ -2,8 +2,10 @@
 import { Package, Calendar } from "lucide-react";
 
 interface AdminTabsProps {
-  activeTab: "packages" | "bookings" | "timeslots";
-  onTabChange: (tab: "packages" | "bookings" | "timeslots") => void;
+  activeTab: "packages" | "bookings" | "freeBookings" | "timeslots";
+  onTabChange: (
+    tab: "packages" | "bookings" | "freeBookings" | "timeslots"
+  ) => void;
 }
 
 export default function AdminTabs({ activeTab, onTabChange }: AdminTabsProps) {
@@ -32,6 +34,17 @@ export default function AdminTabs({ activeTab, onTabChange }: AdminTabsProps) {
           >
             <Calendar className="w-5 h-5 inline-block mr-2" />
             Réservations
+          </button>
+          <button
+            onClick={() => onTabChange("freeBookings")}
+            className={`px-6 py-4 text-sm font-medium border-b-2 transition ${
+              activeTab === "freeBookings"
+                ? "border-purple-500 text-purple-600 dark:text-purple-400"
+                : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400"
+            }`}
+          >
+            <Calendar className="w-5 h-5 inline-block mr-2" />
+            Réservations gratuites
           </button>
           <button
             onClick={() => onTabChange("timeslots")}

@@ -134,7 +134,7 @@ export async function getBookingsByEmail(email: string) {
     };
   }
 }
-// Get bookings  
+// Get bookings
 export async function getBookingsByMonth(year: number, month: number) {
   try {
     await connectDB();
@@ -164,7 +164,6 @@ export async function getBookingsByMonth(year: number, month: number) {
     };
   }
 }
-
 
 // Cancel booking
 export async function cancelBooking(bookingId: string) {
@@ -213,5 +212,130 @@ export async function getBookedSlots(date: string) {
   } catch (error) {
     console.error("Error fetching booked slots:", error);
     return [];
+  }
+}
+
+// Get all bookings with filters (for admin)
+export async function getAllBookingsAdmin(filters?: {
+  status?: string;
+  date?: string;
+  email?: string;
+}) {
+  try {
+    await connectDB();
+
+    const query: any = {};
+
+    if (filters?.status) {
+      query.status = filters.status;
+    }
+
+    if (filters?.date) {
+      query.date = filters.date;
+    }
+
+    if (filters?.email) {
+      query.email = { $regex: filters.email, $options: "i" };
+    }
+
+    const bookings = await Booking.find(query)
+      .sort({ date: -1, time: -1 })
+      .lean();
+
+    return {
+      success: true,
+      bookings: JSON.parse(JSON.stringify(bookings)),
+    };
+  } catch (error) {
+    console.error("Error fetching all bookings:", error);
+    return {
+      success: false,
+      error: "Échec de la récupération des réservations",
+    };
+  }
+}
+
+// Update booking status (already exists but here's the complete version)
+export async function updateBookingStatus(
+  bookingId: string,
+  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW"
+) {
+  try {
+    await connectDB();
+
+    if (!bookingId || !status) {
+      return {
+        success: false,
+        error: "ID et statut requis",
+      };
+    }
+
+    const booking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!booking) {
+      return {
+        success: false,
+        error: "Réservation non trouvée",
+      };
+    }
+
+    return {
+      success: true,
+      booking: JSON.parse(JSON.stringify(booking)),
+    };
+  } catch (error) {
+    console.error("Error updating booking status:", error);
+    return {
+      success: false,
+      error: "Échec de la mise à jour du statut",
+    };
+  }
+}
+
+// Get booking statistics
+export async function getBookingStats() {
+  try {
+    await connectDB();
+
+    const totalBookings = await Booking.countDocuments();
+    const pendingBookings = await Booking.countDocuments({ status: "PENDING" });
+    const confirmedBookings = await Booking.countDocuments({
+      status: "CONFIRMED",
+    });
+    const completedBookings = await Booking.countDocuments({
+      status: "COMPLETED",
+    });
+    const cancelledBookings = await Booking.countDocuments({
+      status: "CANCELLED",
+    });
+
+    // Get today's bookings
+    const today = new Date().toISOString().split("T")[0];
+    const todayBookings = await Booking.countDocuments({
+      date: today,
+      status: { $in: ["PENDING", "CONFIRMED"] },
+    });
+
+    return {
+      success: true,
+      stats: {
+        total: totalBookings,
+        pending: pendingBookings,
+        confirmed: confirmedBookings,
+        completed: completedBookings,
+        cancelled: cancelledBookings,
+        today: todayBookings,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching booking stats:", error);
+    return {
+      success: false,
+      error: "Échec de la récupération des statistiques",
+    };
   }
 }

@@ -43,8 +43,7 @@ export default function BookingPage() {
     loading: timeSlotsLoading,
     error: timeSlotsError,
   } = useTimeSlots(selectedDate);
-  console.log(availableTimes);
-  console.log(selectedDate);
+
   const handleReserverClick = () => {
     if (!selectedDate || !selectedTime) {
       setError("Veuillez sélectionner une date et une heure");

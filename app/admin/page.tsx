@@ -14,10 +14,12 @@ import { PackageInput } from "@/lib/actions/package.action";
 import ConfirmModal from "@/components/admin/ConfirmModal";
 import { Toast } from "@/components/Toast";
 import { usePackages } from "@/hooks/use-package";
+import { useBookings } from "@/hooks/use-bookings";
+import { bookingStatusEmailTemplate } from "@/lib/bookingStatusTemplate";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<
-    "packages" | "bookings" | "timeslots"
+    "packages" | "bookings" | "freeBookings" | "timeslots"
   >("packages");
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
@@ -38,21 +40,7 @@ export default function AdminDashboard() {
     deletePackage,
   } = usePackages();
 
-  const [bookings, setBookings] = useState<BookingType[]>([
-    {
-      _id: "1",
-      name: "Marie Dubois",
-      email: "marie@example.com",
-      phone: "+33612345678",
-      date: "2024-12-15",
-      time: "14:00",
-      status: "CONFIRMED",
-      package: "Séance Découverte",
-      message: "Première séance",
-      createdAt: new Date("2024-12-01"),
-      updatedAt: new Date("2024-12-01"),
-    },
-  ]);
+  const { allBookings, setBookings, bookings } = useBookings();
 
   const [formData, setFormData] = useState<Partial<PackageInput>>({
     name: "",
@@ -80,7 +68,7 @@ export default function AdminDashboard() {
     if (!deleteId) return;
 
     try {
-      const success:any = await deletePackage(deleteId);
+      const success: any = await deletePackage(deleteId);
       if (success) {
         await refreshPackages();
         setToast({
@@ -114,12 +102,32 @@ export default function AdminDashboard() {
     setShowModal(false);
   };
 
-  const updateBookingStatus = (id: string, status: BookingStatus) => {
-    setBookings(
-      bookings.map((b) =>
-        b._id === id ? { ...b, status, updatedAt: new Date() } : b
-      )
-    );
+  const updateBookingStatus = async (id: string, status: BookingStatus) => {
+    try {
+      await updateBookingStatus(id, status);
+      setBookings(
+        bookings.map((b) =>
+          b._id === id ? { ...b, status, updatedAt: new Date() } : b
+        )
+      );
+
+      const booking = bookings.find((b) => b._id === id);
+
+      if (booking) {
+        await bookingStatusEmailTemplate(
+          booking.email,
+          booking.name,
+          status,
+          booking.date,
+          booking.time
+        );
+      }
+    } catch (error) {
+      setToast({
+        message: "Erreur lors changement de status.",
+        type: "error",
+      });
+    }
   };
 
   const stats = [
@@ -131,19 +139,19 @@ export default function AdminDashboard() {
     },
     {
       name: "Total Réservations",
-      value: bookings.length,
+      value: allBookings.length,
       icon: Calendar,
       color: "bg-pink-500",
     },
     {
       name: "En Attente",
-      value: bookings.filter((b) => b.status === "PENDING").length,
+      value: allBookings.filter((b) => b.status === "PENDING").length,
       icon: Clock,
       color: "bg-yellow-500",
     },
     {
       name: "Confirmées",
-      value: bookings.filter((b) => b.status === "CONFIRMED").length,
+      value: allBookings.filter((b) => b.status === "CONFIRMED").length,
       icon: CheckCircle,
       color: "bg-green-500",
     },
@@ -196,7 +204,7 @@ export default function AdminDashboard() {
         {/* Bookings Tab */}
         {activeTab === "bookings" && (
           <BookingsTable
-            bookings={bookings}
+            bookings={allBookings}
             onStatusChange={updateBookingStatus}
           />
         )}

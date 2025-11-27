@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/booking.action";
 import { TIME_SLOTS } from "@/app/booking/page";
 import { sendEmail } from "@/lib/email";
+import { BookingType } from "@/types";
 
 export interface Booking {
   _id: string;
@@ -34,7 +35,15 @@ export const useBookings = (userEmail?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-  const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  const [allBookings, setAllBookings] = useState<BookingType[]>([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    completed: 0,
+    cancelled: 0,
+    today: 0,
+  });
   useEffect(() => {
     fetchAllBookings(currentYear, currentMonth + 1); // only call if selectedDate is not null
   }, [currentMonth, currentYear]);
@@ -48,6 +57,7 @@ export const useBookings = (userEmail?: string) => {
       console.error(err);
     }
   };
+
   useEffect(() => {
     if (userEmail) {
       fetchBookings();
@@ -221,6 +231,7 @@ export const useBookings = (userEmail?: string) => {
     }
   };
   return {
+    allBookings,
     bookings,
     selectedDate,
     selectedTime,
@@ -239,5 +250,6 @@ export const useBookings = (userEmail?: string) => {
     cancelBooking,
     fetchBookings,
     isDayFullyBooked,
+    setBookings,
   };
 };
