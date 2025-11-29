@@ -26,8 +26,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navigation />
           <BookingProvider>
+            <Navigation />
+
             <main>{children}</main>
           </BookingProvider>
           <footer className="bg-gray-100 dark:bg-gray-900 mt-12 py-8 transition-colors">

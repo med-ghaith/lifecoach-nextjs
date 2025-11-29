@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Heart, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useBooking } from "@/context/BookingContext";
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { setMaxSessions, setSelectedPackage } = useBooking();
 
   const navLinks = [
     { href: "/", label: "Accueil" },
@@ -20,13 +22,26 @@ export default function Navigation() {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
-
+  // Reset context when leaving /booking page
+  const handleNavClick = (href: string) => {
+    // If currently on /booking and navigating away from it, reset values
+    if (pathname === "/booking" && href !== "/booking") {
+      setMaxSessions(1);
+      setSelectedPackage(null);
+    }
+    // Close mobile menu
+    setMobileMenuOpen(false);
+  };
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full top-0 z-50 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link
+            href="/"
+            onClick={() => handleNavClick("/")}
+            className="flex items-center"
+          >
             <Heart className="h-8 w-8 text-purple-600" />
             <span className="ml-2 text-2xl font-bold text-gray-800 dark:text-white">
               Léopoldine Almeida
@@ -39,6 +54,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => handleNavClick(link.href)}
                 className={`${
                   isActive(link.href)
                     ? "text-purple-600 dark:text-purple-400"
@@ -80,7 +96,10 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  handleNavClick(link.href);
+                  setMobileMenuOpen(false);
+                }}
                 className="block w-full text-left py-2 text-gray-800 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition"
               >
                 {link.label}
