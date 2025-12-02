@@ -3,6 +3,9 @@
 import { useState, FormEvent } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 import { sendEmail } from "@/lib/email";
+import { render } from "@react-email/render";
+import { OwnerEmail } from "../emailTemplates/OwnerEmail";
+import { ClientEmail } from "../emailTemplates/ClientEmail";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -19,22 +22,35 @@ export default function ContactForm() {
     setError(null);
 
     if (!formData.name || !formData.email || !formData.message) return;
-    const html = `
-    <h2>New Contact Message</h2>
-    <p><strong>Name:</strong> ${formData.name}</p>
-    <p><strong>Email:</strong> ${formData.email}</p>
-    <p><strong>Phone:</strong> ${formData.phone || "N/A"}</p>
-    <p><strong>Message:</strong></p>
-    <p>${formData.message}</p>
-  `;
-
-    const result = await sendEmail({
+    // Render emails to HTML
+    const clientHtml = render(
+      <ClientEmail
+        name={formData.name}
+       
+      />
+    );
+    const ownerHtml = render(
+      <OwnerEmail
+        name={formData.name}
+        email={formData.email}
+        phone={formData.phone}
+        message={formData.message}
+        dashboardUrl="https://example.com/dashboard"
+      />
+    );
+    const emailSendToOwner = await sendEmail({
       to: formData.email, // or your admin email
       subject: "New Contact Message",
-      html,
+      html: await ownerHtml,
     });
+    const emailSentToUser = await sendEmail({
+      to: formData.email, // or your admin email
+      subject: "Transformez Votre Avenir grâce à une Consultation Miraculeuse",
+      html: await clientHtml,
+    });
+    // html: `<p>Merci beaucoup pour votre message et pour votre intérêt je serai ravie  de vous accompagner en consultation miraculeux pour changer votre avenir</p>`,
 
-    if (result?.success) {
+    if (emailSentToUser?.success && emailSendToOwner?.success) {
       setFormSubmitted(true);
       setTimeout(() => {
         setFormSubmitted(false);
@@ -43,13 +59,13 @@ export default function ContactForm() {
     } else {
       setError("Une erreur s'est produite. Veuillez réessayer.");
     }
-    await fetch("/api/send-whatsapp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+    // await fetch("/api/send-whatsapp", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify(formData),
+    // });
   };
 
   const isFormValid = formData.name && formData.email && formData.message;

@@ -252,7 +252,15 @@ export const useBookings = (
             <p>Votre réservation a été confirmée :</p>
             <p><strong>Créneaux réservés :</strong><br/>${slotsText}</p>
             <p><strong>Forfait:</strong> ${result.booking.package.name}</p>
-            <p><strong>Prix:</strong> ${result.booking.package.price}€</p>
+            ${
+              result.booking.package.discount
+                ? `<p><strong>Prix:</strong> ${
+                    (result.booking.package.price *
+                      result.booking.package.discount) /
+                    100
+                  }€</p>`
+                : `<p><strong>Prix:</strong> ${result.booking.package.price}€</p>`
+            }
           `,
         });
       } catch (emailError) {
