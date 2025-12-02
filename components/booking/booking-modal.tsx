@@ -43,7 +43,6 @@ export default function BookingModal({
   const { isLoading, packages } = usePackages();
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  console.log("=============>", selectedPackage);
   if (!isOpen) return null;
 
   const handleSubmit = async (e: FormEvent) => {
@@ -109,6 +108,11 @@ export default function BookingModal({
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Capture failed");
       setPaymentSuccess(true);
+      // Call handleSubmit WITHOUT event since this is not a form submit
+      const success = await onSubmit(formData);
+      if (success) {
+        setFormData({ name: "", email: "", phone: "" });
+      }
     } catch (err) {
       console.error(err);
       setPaypalError("Payment failed. Please try again.");
@@ -393,28 +397,30 @@ export default function BookingModal({
               )}
             </div>
             {/* Buttons */}
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={loading}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={
-                  loading ||
-                  !formData.name ||
-                  !formData.email ||
-                  !selectedPackage
-                }
-                className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Réservation..." : "Confirmer"}
-              </button>
-            </div>
+            {amount === 0 && (
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={loading}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    loading ||
+                    !formData.name ||
+                    !formData.email ||
+                    !selectedPackage
+                  }
+                  className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Réservation..." : "Confirmer"}
+                </button>
+              </div>
+            )}
           </form>
         </div>
       </div>
