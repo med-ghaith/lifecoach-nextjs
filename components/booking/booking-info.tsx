@@ -19,9 +19,9 @@ export default function BookingInfo() {
             <Mail className="h-5 w-5 text-purple-600" />
             <a
               className="text-sm text-gray-700 hover:text-purple-600"
-              href="mailto:contact@leopoldine-almeida.com"
+              href="mailto:Support@leopoldinealmeida.com"
             >
-              contact@leopoldine-almeida.com
+              Support@leopoldinealmeida.com
             </a>
           </div>
           <div className="flex items-center gap-2">
@@ -30,7 +30,7 @@ export default function BookingInfo() {
               className="text-sm text-gray-700 hover:text-purple-600"
               href="tel:+33123456789"
             >
-              +33 1 23 45 67 89
+              +33 0 758 230 354
             </a>
           </div>
         </div>

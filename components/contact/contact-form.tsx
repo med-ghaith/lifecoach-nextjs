@@ -17,7 +17,6 @@ export default function ContactForm() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -35,12 +34,11 @@ export default function ContactForm() {
           email={formData.email}
           phone={formData.phone}
           message={formData.message}
-          dashboardUrl="https://example.com/admin/dashboard"
+          dashboardUrl={`${process.env.NEXT_PUBLIC_WEB_DNS!}/admin/dashboard`}
         />
       );
-
       const emailSendToOwner = await sendEmail({
-        to: formData.email,
+        to: `${process.env.NEXT_PUBLIC_EMAIL_USER!}`,
         subject: "New Contact Message",
         html: await ownerHtml,
       });
@@ -163,10 +161,10 @@ export default function ContactForm() {
       <div className="pt-4 text-sm text-gray-500">
         Ou écrivez directement à :{" "}
         <a
-          href="mailto:contact@leopoldine-almeida.com"
+          href="mailto:Support@leopoldinealmeida.com"
           className="text-purple-600 font-medium hover:text-purple-700"
         >
-          contact@leopoldine-almeida.com
+          Support@leopoldinealmeida.com
         </a>
       </div>
     </form>

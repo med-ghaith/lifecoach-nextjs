@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent } from "react";
 import { X, Calendar, Clock, User, Mail, Phone } from "lucide-react";
 import { usePackages } from "@/hooks/use-package";
 import { TimeSlot } from "@/hooks/use-bookings";

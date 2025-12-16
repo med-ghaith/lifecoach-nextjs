@@ -1,11 +1,15 @@
 "use server";
 
+import ClientBookingEmail from "@/components/emailTemplates/ClientBookingEmail";
 import BookingDate from "@/database/booking-date.model";
 import BookingTime from "@/database/booking-time.model";
 import Booking from "@/database/booking.model";
 import Package from "@/database/package.modal";
 import connectDB from "@/lib/mongodb";
+import { render } from "@react-email/render";
 import mongoose from "mongoose";
+import { sendEmail } from "../email";
+import { OwnerBookingEmail } from "@/components/emailTemplates/OwnerBookingEmail";
 
 interface TimeSlot {
   date: string;
@@ -405,5 +409,76 @@ export async function updateBookingStatus(
       success: false,
       error: "Échec de la mise à jour du statut",
     };
+  }
+}
+export async function sendBookingConfirmationEmail({
+  name,
+  email,
+  slotsText,
+  packageName,
+  price,
+}: {
+  name: string;
+  email: string;
+  slotsText: string;
+  packageName: string;
+  price: number;
+}) {
+  try {
+    const emailHtml = await render(
+      ClientBookingEmail({
+        name,
+        slotsText,
+        packageName,
+        price,
+      })
+    );
+
+    await sendEmail({
+      to: email,
+      subject: "Confirmation de votre réservation",
+      html: emailHtml,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return { success: false, error: "Failed to send email" };
+  }
+}
+export async function sendOwnerBookingNotificationEmail({
+  clientName,
+  clientEmail,
+  slotsText,
+  packageName,
+  price,
+}: {
+  clientName: string;
+  clientEmail: string;
+  slotsText: string;
+  packageName: string;
+  price: number;
+}) {
+  try {
+    const emailHtml = await render(
+      OwnerBookingEmail({
+        clientName,
+        clientEmail,
+        slotsText,
+        packageName,
+        price,
+      })
+    );
+
+    await sendEmail({
+      to: process.env.NEXT_PUBLIC_EMAIL_USER!,
+      subject: "📢 Nouvelle réservation",
+      html: emailHtml,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending owner email:", error);
+    return { success: false, error: "Failed to send email" };
   }
 }

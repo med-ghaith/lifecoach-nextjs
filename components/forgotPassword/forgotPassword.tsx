@@ -25,7 +25,7 @@ export default function ForgotPasswordView() {
    setError("");
 
    try {
-     const baseUrl = "https://example.com/admin/reset-password";
+     const baseUrl = `${process.env.NEXT_PUBLIC_WEB_DNS!}/admin/reset-password`;
      const ownerHtml = render(
        <ForgotPasswordEmail
          resetUrl={`${baseUrl}?email=${encodeURIComponent(email)}`}

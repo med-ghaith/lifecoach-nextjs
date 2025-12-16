@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { render } from "@react-email/render";
@@ -49,7 +49,9 @@ export default function ResetPasswordView() {
       return;
     }
     const emailHtml = render(
-      <PasswordResetSuccessEmail loginUrl="https://example.com/admin/login" />
+      <PasswordResetSuccessEmail
+        loginUrl={`${process.env.NEXT_PUBLIC_WEB_DNS!}/admin/login`}
+      />
     );
     // Simulate API call
     try {
@@ -66,7 +68,7 @@ export default function ResetPasswordView() {
         
 
         await sendEmail({
-          to: "hazem.ghannem@esprit.tn",
+          to: email,
           subject: "Mot de passe réinitialisé avec succès",
           html: await emailHtml,
         });

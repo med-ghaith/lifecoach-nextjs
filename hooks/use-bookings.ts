@@ -7,8 +7,9 @@ import {
   cancelBooking as cancelBookingAction,
   getBookedSlots,
   getBookingsByMonth,
+  sendBookingConfirmationEmail,
+  sendOwnerBookingNotificationEmail,
 } from "@/lib/actions/booking.action";
-import { sendEmail } from "@/lib/email";
 import { useBooking } from "@/context/BookingContext";
 
 export interface TimeSlot {
@@ -242,26 +243,26 @@ export const useBookings = (
         const slotsText = selectedTimeSlots
           .map((slot) => `${slot.date} à ${slot.time}`)
           .join("<br/>");
-
-        await sendEmail({
-          to: bookingData.email,
-          subject: "Confirmation de votre réservation",
-          html: `
-            <h2>Réservation confirmée</h2>
-            <p>Bonjour ${bookingData.name},</p>
-            <p>Votre réservation a été confirmée :</p>
-            <p><strong>Créneaux réservés :</strong><br/>${slotsText}</p>
-            <p><strong>Forfait:</strong> ${result.booking.package.name}</p>
-            ${
-              result.booking.package.discount
-                ? `<p><strong>Prix:</strong> ${
-                    (result.booking.package.price *
-                      result.booking.package.discount) /
-                    100
-                  }€</p>`
-                : `<p><strong>Prix:</strong> ${result.booking.package.price}€</p>`
-            }
-          `,
+        let finalPrice = result.booking.package.price;
+        if (result.booking.package.discount) {
+          finalPrice =
+            (result.booking.package.price * result.booking.package.discount) /
+            100;
+        }
+        await sendBookingConfirmationEmail({
+          name: bookingData.name,
+          email: bookingData.email,
+          slotsText,
+          packageName: result.booking.package.name,
+          price: finalPrice,
+        });
+        // Send notification email to owner
+        await sendOwnerBookingNotificationEmail({
+          clientName: bookingData.name,
+          clientEmail: bookingData.email,
+          slotsText,
+          packageName: result.booking.package.name,
+          price: finalPrice,
         });
       } catch (emailError) {
         console.error("Error sending email:", emailError);

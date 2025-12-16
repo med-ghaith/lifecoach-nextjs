@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
