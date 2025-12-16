@@ -23,7 +23,7 @@ export async function sendEmail({
 
   try {
     await transporter.sendMail({
-      from: `"Your App" <${process.env.EMAIL_USER}>`,
+      from: `"Léopoldine Almeida" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,

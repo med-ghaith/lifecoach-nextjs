@@ -47,3 +47,38 @@ export async function loginUser(
     return { success: false, message: "Erreur du serveur" };
   }
 }
+export async function changePasswordByEmail(
+  email: string,
+  newPassword: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    await connectDB();
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return { success: false, message: "Utilisateur non trouvé" };
+    }
+    // Prevent same password reuse
+    const isSame = await bcrypt.compare(newPassword, user.password);
+    if (isSame) {
+      return {
+        success: false,
+        message: "Le nouveau mot de passe doit être différent de l’ancien",
+      };
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    return {
+      success: true,
+      message: "Mot de passe modifié avec succès",
+    };
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return { success: false, message: "Erreur du serveur" };
+  }
+}

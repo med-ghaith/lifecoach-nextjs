@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("admin@example.com");
-  const [password, setPassword] = useState("password123");
+  const [password, setPassword] = useState("Password1234");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
+  const navigate = ()=>{
+    router.push("/admin/forgot-password");
+  }
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true); // start loading
@@ -104,8 +106,8 @@ export default function LoginPage() {
               </span>
             </label>
             <a
-              href="#"
-              className="text-sm text-purple-600  hover:text-purple-700  font-medium transition"
+              onClick={navigate}
+              className="text-sm text-purple-600  hover:text-purple-700  font-medium transition cursor-pointer"
             >
               Mot de passe oublié ?
             </a>

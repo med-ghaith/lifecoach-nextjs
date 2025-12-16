@@ -1,7 +1,7 @@
 // app/admin/page.tsx or components/AdminDashboard.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Package, Calendar, Clock, CheckCircle } from "lucide-react";
 import { PackageType,  BookingStatus } from "@/types";
 import PackageModal from "@/components/admin/package-modal";
@@ -17,7 +17,6 @@ import { usePackages } from "@/hooks/use-package";
 import { useBookings } from "@/hooks/use-bookings";
 import { bookingStatusEmailTemplate } from "@/lib/bookingStatusTemplate";
 import { updateBookingStatus } from "@/lib/actions/booking.action";
-import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<
