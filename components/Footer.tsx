@@ -1,4 +1,4 @@
-import { Mail, MessageCircle, Facebook } from "lucide-react";
+import { Mail, Phone, Facebook } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -21,7 +21,7 @@ export default function Footer() {
               className="flex items-center  hover:text-green-600  transition-colors"
               aria-label="WhatsApp"
             >
-              <MessageCircle className="h-5 w-5" />
+              <Phone className="h-5 w-5" />
             </a>
             <a
               href="https://facebook.com/leopoldinealmeida"
